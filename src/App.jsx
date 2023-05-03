@@ -1,38 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import "./App.css";
-import MockList from "./MockList";
-import { MOCKDATA } from "./fakeData";
+import List from "./List";
+import { MOCKDATA } from "./mockData";
 
 function App() {
+  const [isPending, startTransition] = useTransition();
   const [keyword, setKeyword] = useState("");
-  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
   const [result, setResult] = useState([]);
 
   useEffect(() => {
-    setProducts(MOCKDATA);
+    setUsers(MOCKDATA);
   }, []);
 
   const handleChange = async (e) => {
     setKeyword(e.target.value);
-    setResult(
-      products.length &&
-        products.filter((item) => item.name.includes(e.target.value))
-    );
+    startTransition(() => {
+      setResult(
+        users.length &&
+          users.filter((item) => item.name.includes(e.target.value))
+      );
+    });
   };
 
   return (
     <>
-      <h1>Search Products</h1>
+      <h1>Search Users</h1>
       <div className="card">
         <input value={keyword} onChange={handleChange} />
-        <p>Searching for: {keyword}</p>
-        {result.length &&
+        <h2>Searching for: {keyword}</h2>
+        {isPending ? (
+          <h1>Loading...</h1>
+        ) : (
+          result.length &&
           keyword &&
-          result.map((item) => <MockList key={item?.id} item={item} />)}
+          result.map((item) => <List key={item?.id} item={item} />)
+        )}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   );
 }
